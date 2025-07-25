@@ -20,6 +20,29 @@ try {
 } catch (PDOException $e) {
     echo "❌ Connection failed: " . $e->getMessage();
 }
-// Using MySQLi
+
+function filternation($data){
+    foreach($data as $key => $value){
+        $data[$key] = trim($value);
+        $data[$key] = stripslashes($value);
+        $data[$key] = htmlspecialchars($value);
+        $data[$key] = strip_tags($value);
+    }
+    return $data;
+}
+
+function select($sql, $values=[]){
+    global $pdo;
+
+
+    try{
+        $stmt =$pdo->prepare($sql);
+        $stmt->execute($values);
+        return $stmt->fetchAll();
+    }catch(PDOException $e){
+        echo "❌ Error: " . $e->getMessage();
+    }
+}
+
 
 ?>

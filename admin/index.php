@@ -1,5 +1,10 @@
 <?php
-require_once('inc/db_config.php')
+
+require('inc/essentials.php');
+require_once('inc/db_config.php');
+
+
+adminLogin(); 
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -37,10 +42,10 @@ require_once('inc/db_config.php')
             <h3 class="mb-4">Admin Login</h3>
             <form method="post">
                 <div class="mb-3">
-                    <input name="admin" required type="text" name="username" class="form-control" placeholder="Username" required>
+                    <input name="admin_name" required type="text" name="username" class="form-control" placeholder="Username" required>
                 </div>
                 <div class="mb-3">
-                    <input name="pass" required type="password" name="password" class="form-control" placeholder="Password" required>
+                    <input name="admin_pass" required type="password" name="password" class="form-control" placeholder="Password" required>
                 </div>
                 <button name="login" type="submit" class="btn btn-primary w-100">Login</button>
             </form>
@@ -55,7 +60,24 @@ require_once('inc/db_config.php')
 <?php
 
 if(isset($_POST['login'])){
+    $frm_data = filternation($_POST);
     
+    $query = "SELECT * FROM `admin_cred` WHERE `admin_name`=? AND `admin_pass`=?";
+    $values = [$frm_data['admin_name'],$frm_data['admin_pass']];
+
+
+    $res = select($query, $values);
+
+    if($res && count($res) == 1){
+        echo "got user";
+        
+        $_SESSION['admin_login'] = true;
+        $_SESSION['admin_id'] = $res[0]['admin_id'];
+        redirect('dashboard.php');
+    } else {
+        alert('error','Login failed! - Invalid credentials.');
+    }
+
 }
 
 ?>
