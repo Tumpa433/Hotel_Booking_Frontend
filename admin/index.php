@@ -1,10 +1,11 @@
 <?php
 
 require('inc/essentials.php');
-require_once('inc/db_config.php');
-
-
-adminLogin(); 
+require('inc/db_config.php');
+session_start();
+if ((isset($_SESSION['adminLogin']) && $_SESSION['adminLogin'] == true)) {
+    redirect('dashboard.php');
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -39,13 +40,13 @@ adminLogin();
 
     <div class="login-form text-center rounded bg-white shadow overflow-hidden">
         <div class="p-4">
-            <h3 class="mb-4">Admin Login</h3>
-            <form method="post">
+            <h3 class="mb-4">Admin Login Panel</h3>
+            <form method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                 <div class="mb-3">
-                    <input name="admin_name" required type="text" name="username" class="form-control" placeholder="Username" required>
+                    <input name="admin_name" required type="text" class="form-control" placeholder="Username" required>
                 </div>
                 <div class="mb-3">
-                    <input name="admin_pass" required type="password" name="password" class="form-control" placeholder="Password" required>
+                    <input name="admin_pass" required type="password" class="form-control" placeholder="Password" required>
                 </div>
                 <button name="login" type="submit" class="btn btn-primary w-100">Login</button>
             </form>
@@ -56,35 +57,28 @@ adminLogin();
         </div>
     </div>
 
+    <?php
 
-<?php
+    if (isset($_POST['login'])) {
+        $frm_data = filteration($_POST);
 
-if(isset($_POST['login'])){
-    $frm_data = filternation($_POST);
-    
-    $query = "SELECT * FROM `admin_cred` WHERE `admin_name`=? AND `admin_pass`=?";
-    $values = [$frm_data['admin_name'],$frm_data['admin_pass']];
+        $query = "SELECT * FROM `admin_cred` WHERE `admin_name`=? AND `admin_pass`=?";
+        $values = [$frm_data['admin_name'], $frm_data['admin_pass']];
 
-
-    $res = select($query, $values);
-
-    if($res && count($res) == 1){
-        echo "got user";
-        
-        $_SESSION['admin_login'] = true;
-        $_SESSION['admin_id'] = $res[0]['admin_id'];
-        redirect('dashboard.php');
-    } else {
-        alert('error','Login failed! - Invalid credentials.');
+        $res = select($query, $values, "ss");
+        if ($res->num_rows == 1) {
+            $row = mysqli_fetch_assoc($res);
+            $_SESSION['adminLogin'] = true;
+            $_SESSION['adminId'] = $row['sr_no'];
+            redirect('dashboard.php');
+        } else {
+            alert('error', 'Login failed - Invalid Credentials !!');
+        }
     }
 
-}
+    ?>
 
-?>
-
-
-
-    <?php require('inc/scripts.php') ?>
+    <?php require('inc/scripts.php'); ?>
 
 
 </body>

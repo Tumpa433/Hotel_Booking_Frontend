@@ -1,48 +1,44 @@
 <?php
 
-
-$host = '127.0.0.1';
-$db = 'hbdb';
-$user = 'root';
+$hname = 'localhost';
+$uname = 'root';
 $pass = 'BISWAS';
-$charset = 'utf8mb4';
+$db = 'hbdb';
+$port = 4306;
 
-// Using PDO
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-];
+$con = mysqli_connect($hname, $uname, $pass, $db, $port);
 
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-    
-} catch (PDOException $e) {
-    echo "❌ Connection failed: " . $e->getMessage();
+if (!$con) {
+    die("Cannot Connect to Database" . mysqli_connect_error());
 }
 
-function filternation($data){
+function filteration($data){
     foreach($data as $key => $value){
         $data[$key] = trim($value);
-        $data[$key] = stripslashes($value);
+        $data[$key] = stripcslashes($value);
         $data[$key] = htmlspecialchars($value);
         $data[$key] = strip_tags($value);
     }
     return $data;
 }
-
-function select($sql, $values=[]){
-    global $pdo;
-
-
-    try{
-        $stmt =$pdo->prepare($sql);
-        $stmt->execute($values);
-        return $stmt->fetchAll();
-    }catch(PDOException $e){
-        echo "❌ Error: " . $e->getMessage();
+function select($sql,$values,$datatypes)
+{
+    $con = $GLOBALS['con'];
+    if($stmt = mysqli_prepare($con,$sql)){
+           mysqli_stmt_bind_param($stmt,$datatypes,...$values);
+           if(mysqli_stmt_execute($stmt)){
+            $res = mysqli_stmt_get_result($stmt);
+            mysqli_stmt_close($stmt);
+            return $res;
+           }
+           else{
+            mysqli_stmt_close($stmt);
+             die("Query cannot be executed - select");
+           }
+           
+    }
+    else{
+        die("Query cannot be prepared - select");
     }
 }
-
-
 ?>

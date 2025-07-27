@@ -1,23 +1,23 @@
 <?php
 
 function adminLogin(){
-    if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true){
-        redirect('dashboard.php');
-       
-    } 
+    session_start();
+    if(!(isset($_SESSION['adminLogin']) && $_SESSION['adminLogin']==true)){
+       echo "<script>
+    window.location.href='index.php';
+    </script>";
+    }
 }
 
 
- function redirect($url)
-    {
-        echo "<script>location.href='$url'</script>";
-        exit();
-        
-    }
-
-function alert($type, $msg)
+function redirect($url)
 {
+    echo "<script>
+    window.location.href='$url';
+    </script>";
+}
 
+function alert($type, $msg){
     $bs_class = ($type == 'error') ? "alert-danger" : "alert-success";
 
 
